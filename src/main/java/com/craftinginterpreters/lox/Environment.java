@@ -1,11 +1,13 @@
 package com.craftinginterpreters.lox;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 class Environment {
   final Environment enclosing;
   private final Map<String, Object> values = new HashMap<>();
+  private final HashSet<String> keys = new HashSet<>();
 
   Environment() {
     enclosing = null;
@@ -26,7 +28,7 @@ class Environment {
   }
 
   void assign(Token name, Object value) {
-    if (values.containsKey(name.lexeme)) {
+    if (keys.contains(name.lexeme)) {
       values.put(name.lexeme, value);
       return;
     }
@@ -40,6 +42,9 @@ class Environment {
   }
 
   void define(String name, Object value) {
-    values.put(name, value);
+    keys.add(name);
+    if (value != null) {
+      values.put(name, value);
+    }
   }
 }
