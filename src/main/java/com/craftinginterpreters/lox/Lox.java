@@ -39,7 +39,16 @@ public class Lox {
 
     for (;;) {
       System.out.print("> ");
-      run(reader.readLine());
+      // String expressionString = reader.readLine();
+      // Scanner scanner = new Scanner(expressionString);
+      // List<Token> tokens = scanner.scanTokens();
+      // Parser parser = new Parser(tokens);
+      // Expr expression = parser.parseExpression();
+      // if (hadError) continue;
+
+      // Object result =  interpreter.evaluate(expression);
+      // System.out.println(result);
+      runStatementsOrExpression(reader.readLine());
       hadError = false;
     }
   }
@@ -54,6 +63,28 @@ public class Lox {
     if (hadError) return;
 
     interpreter.interpret(statements);
+  }
+
+  private static void runStatementsOrExpression(String source) {
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+    Parser parser = new Parser(tokens);
+    List<Stmt> statements = parser.parse();
+
+    if (!hadError) {
+      interpreter.interpret(statements);
+      return;
+    }
+
+    System.out.println("Encountered statement error, falling back to expression");
+    hadError = false;
+    Expr expression = parser.parseExpression();
+
+    // Stop if there was a syntax error.
+    if (hadError) return;
+
+    Object result =  interpreter.evaluate(expression);
+    System.out.println(result);
   }
 
   static void error(int line, String message) {

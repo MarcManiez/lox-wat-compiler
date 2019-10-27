@@ -49,8 +49,17 @@ class Parser {
     return statements;
   }
 
+  Expr parseExpression() {
+    current = 0;
+    return expression();
+  }
+
   private Expr expression() {
-    return assignment();
+    try {
+      return assignment();
+    } catch (ParseError error) {
+      return null;
+    }
   }
 
   private Stmt declaration() {
