@@ -62,6 +62,12 @@ public class Lox {
     // Stop if there was a syntax error.
     if (hadError) return;
 
+    Resolver resolver = new Resolver(interpreter);
+    resolver.resolve(statements);
+
+    // Stop if there was a resolution error.
+    if (hadError) return;
+
     interpreter.interpret(statements);
   }
 
@@ -72,6 +78,12 @@ public class Lox {
     List<Stmt> statements = parser.parse();
 
     if (!hadError) {
+      Resolver resolver = new Resolver(interpreter);
+      resolver.resolve(statements);
+
+      // Stop if there was a resolution error.
+      if (hadError) return;
+
       interpreter.interpret(statements);
       return;
     }
@@ -81,6 +93,11 @@ public class Lox {
     Expr expression = parser.parseExpression();
 
     // Stop if there was a syntax error.
+    if (hadError) return;
+    Resolver resolver = new Resolver(interpreter);
+    resolver.resolve(statements);
+
+    // Stop if there was a resolution error.
     if (hadError) return;
 
     Object result =  interpreter.evaluate(expression);
