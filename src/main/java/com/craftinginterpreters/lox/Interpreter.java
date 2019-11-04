@@ -24,6 +24,19 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
       @Override
       public String toString() { return "<native fn>"; }
     });
+
+    globals.define("prompt", new LoxCallable(){
+      @Override
+      public int arity() { return 0; }
+
+      @Override
+      public String call(Interpreter interpreter, List<Object> arguments) {
+        return System.console().readLine();
+      }
+
+      @Override
+      public String toString() { return "<native fn>"; }
+    });
   }
 
   void interpret(List<Stmt> statements) {
