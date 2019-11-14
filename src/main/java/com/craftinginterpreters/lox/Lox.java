@@ -58,6 +58,9 @@ public class Lox {
     List<Token> tokens = scanner.scanTokens();
     Parser parser = new Parser(tokens);
     List<Stmt> statements = parser.parse();
+    // Make this optional via argv
+    Compiler compiler = new Compiler(statements);
+    compiler.compile();
 
     // Stop if there was a syntax error.
     if (hadError) return;
