@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+  private int indentationLevel = 0;
+  private PrintWriter writer;
   private final List<Stmt> statements;
   private final List<String> instructions = new ArrayList<>();
   // Wasm is destined to export a function, kind of like C with its "main".
@@ -29,10 +31,18 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     String path = "." + File.separator + "output.wat";
-    PrintWriter writer = new PrintWriter(path, "UTF-8");
+    writer = new PrintWriter(path, "UTF-8");
+    writeLine("(module");
+    indent();
+    writeLine("(func $main");
+    indent();
     for (String instruction : instructions) {
-      writer.println(instruction);
+      writeLine(instruction);
     }
+    outdent();
+    writeLine(")");
+    outdent();
+    writeLine(")");
     writer.close();
   }
 
@@ -42,6 +52,26 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   private Object compile(Expr expression) {
     return expression.accept(this);
+  }
+
+  private String indentation() {
+    String spaces = "";
+    for (int i = 0; i < indentationLevel; i += 1) {
+      spaces += "  ";
+    }
+    return spaces;
+  }
+
+  private void indent() {
+    indentationLevel++;
+  }
+
+  private void outdent() {
+    indentationLevel--;
+  }
+
+  private void writeLine(String line) {
+    writer.println(indentation() + line);
   }
 
   @Override
