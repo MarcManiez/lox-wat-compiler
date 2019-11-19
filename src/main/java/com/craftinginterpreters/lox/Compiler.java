@@ -16,31 +16,28 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   void compile() {
     for (Stmt statement : this.statements) {
-      compileStatement(statement);
-      // go down the tree
-      // when you have no more children
-      // produce instruction (using visitor pattern)
+      compile(statement);
     }
   }
 
-  private Object compileStatement(Stmt statement) {
+  private Object compile(Stmt statement) {
     return statement.accept(this);
   }
 
-  private Object compileExpression(Expr expression) {
+  private Object compile(Expr expression) {
     return expression.accept(this);
   }
 
   @Override
   public Void visitExpressionStmt(Expression stmt) {
-    compileExpression(stmt.expression);
+    compile(stmt.expression);
     return null;
   }
 
   @Override
   public Object visitBinaryExpr(Binary expr) {
-    compileExpression(expr.left);
-    compileExpression(expr.right);
+    compile(expr.left);
+    compile(expr.right);
 
     switch (expr.operator.type) {
       case PLUS:
