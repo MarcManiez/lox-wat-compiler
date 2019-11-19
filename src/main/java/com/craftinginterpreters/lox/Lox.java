@@ -14,9 +14,11 @@ public class Lox {
   static boolean hadRuntimeError = false;
 
   public static void main(String[] args) throws IOException {
-    if (args.length > 1) {
-      System.out.println("Usage: jlox [script]");
+    if (args.length > 2) {
+      System.out.println("Usage: jlox [script] (--compile)");
       System.exit(64);
+    } else if (args.length == 2) {
+      compile(args[0]);
     } else if (args.length == 1) {
       runFile(args[0]);
     } else {
@@ -58,9 +60,6 @@ public class Lox {
     List<Token> tokens = scanner.scanTokens();
     Parser parser = new Parser(tokens);
     List<Stmt> statements = parser.parse();
-    // Make this optional via argv
-    Compiler compiler = new Compiler(statements);
-    compiler.compile();
 
     // Stop if there was a syntax error.
     if (hadError) return;
@@ -72,6 +71,21 @@ public class Lox {
     if (hadError) return;
 
     interpreter.interpret(statements);
+  }
+
+  private static void compile(String path) throws IOException {
+    byte[] bytes = Files.readAllBytes(Paths.get(path));
+    String source = new String(bytes, Charset.defaultCharset());
+    Scanner scanner = new Scanner(source);
+    List<Token> tokens = scanner.scanTokens();
+    Parser parser = new Parser(tokens);
+    List<Stmt> statements = parser.parse();
+
+    // Stop if there was a syntax error.
+    if (hadError) return;
+
+    Compiler compiler = new Compiler(statements);
+    compiler.compile();
   }
 
   private static void runStatementsOrExpression(String source) {

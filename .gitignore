@@ -1,3 +1,9 @@
 target
 .vscode
 .settings
+
+# Compiler output
+output.wat
+
+# Test file
+test.lox
