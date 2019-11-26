@@ -34,7 +34,7 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     writer = new PrintWriter(path, "UTF-8");
     writeLine("(module");
     indent();
-    writeLine("(func $main");
+    writeLine("(func (export \"main\")");
     indent();
     for (String instruction : instructions) {
       writeLine(instruction);
