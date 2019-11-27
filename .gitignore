@@ -4,6 +4,7 @@ target
 
 # Compiler output
 output.wat
+output.wasm
 
 # Test file
 test.lox
