@@ -6,7 +6,7 @@ function logString(offset, length) {
   console.log(string);
 }
 
-function logFloat(int) { // assumes an i32, max.
+function logFloat(int) { // assumes an f32, max.
   console.log(int);
 }
 

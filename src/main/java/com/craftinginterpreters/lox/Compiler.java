@@ -82,25 +82,37 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
   @Override
   public Void visitPrintStmt(Print stmt) {
-    if (stmt.expression instanceof Expr.Binary) {
-    } else if (stmt.expression instanceof Expr.Literal) {
-      compile(stmt.expression);
-      Object value = ((Literal) stmt.expression).value;
-      if (value instanceof String) {
-        writeLine("call $logString");
-      } else { // assuming integer
-        writeLine("call $logFloat");
-      }
+    compile(stmt.expression);
+    TokenType expressionType = stmt.expression.accept(new ReturnType());
+    if (expressionType.equals(TokenType.STRING)) {
+      writeLine("call $logString");
+    } else if (expressionType.equals(TokenType.NUMBER)) {
+      writeLine("call $logFloat");
     }
+    return null;
+  }
 
+  @Override
+  public Object visitBinaryExpr(Binary expr) {
+    // TODO: implement other binary operations
+    switch (expr.operator.type) {
+      case PLUS:
+        writeLine("(f32.add");
+        indent();
+        compile(expr.left);
+        compile(expr.right);
+        outdent();
+        writeLine(")");
+        break;
+    }
     return null;
   }
 
   @Override
   public Object visitLiteralExpr(Literal expr) {
     if (expr.value instanceof String) {
-    } else { // assuming integer
-      writeLine("f32.const " + expr.value.toString());
+    } else {
+      writeLine("(f32.const " + expr.value.toString() + ")");
     }
     return null;
   }
