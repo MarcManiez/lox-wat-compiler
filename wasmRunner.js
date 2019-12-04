@@ -1,5 +1,7 @@
 const fs = require('fs');
 
+const memory = new WebAssembly.Memory({ initial: 1 })
+
 function logString(offset, length) {
   var bytes = new Uint8Array(memory.buffer, offset, length);
   const string = new TextDecoder('utf8').decode(bytes);
@@ -10,10 +12,7 @@ function logFloat(int) { // assumes an f32, max.
   console.log(int);
 }
 
-var importObject = {
-  console: { logFloat, logString },
-  js: { mem: new WebAssembly.Memory({ initial: 1 }) },
-};
+var importObject = { console: { logFloat, logString }, js: { mem: memory } };
 
 const path = process.argv[2]
 WebAssembly.instantiate(fs.readFileSync(path), importObject)
