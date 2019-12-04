@@ -15,19 +15,19 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   private int indentationLevel = 0;
   private PrintWriter writer;
   private final List<Stmt> statements;
+  private List<String> lines;
   // Wasm is destined to export a function, kind of like C with its "main".
   // The compiler should have a boiler plate "main" function declaration.
   // The instructions from the lox code would fit inside that function.
   // The function should be run in node (java can run it in a subprocess)
   // after it's been transformed from wat to wasm using the wabbit toolchain.
 
-  Compiler(List<Stmt> statements) throws IOException {
+  Compiler(List<Stmt> statements) {
     this.statements = statements;
-    String path = "." + File.separator + "output.wat";
-    this.writer = new PrintWriter(path, "UTF-8");
+    this.lines = new ArrayList<String>();
   }
 
-  void compile() {
+  void compile() throws IOException {
     writeLine("(module");
     indent();
     // TODO: use codegen to make JS file to coordinate function signatures and names
@@ -43,7 +43,17 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     writeLine(")");
     outdent();
     writeLine(")");
+    createFile();
+  }
+
+  private Void createFile() throws IOException {
+    String path = "." + File.separator + "output.wat";
+    PrintWriter writer = new PrintWriter(path, "UTF-8");
+    for (String line : lines) {
+      writer.println(line);
+    }
     writer.close();
+    return null;
   }
 
   private Object compile(Stmt statement) {
@@ -71,7 +81,7 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   }
 
   private void writeLine(String line) {
-    writer.println(indentation() + line);
+    lines.add(indentation() + line);
   }
 
   @Override
