@@ -2,8 +2,13 @@ const fs = require('fs');
 
 const memory = new WebAssembly.Memory({ initial: 1 })
 
-function logString(offset, length) {
-  var bytes = new Uint8Array(memory.buffer, offset, length);
+function logString(offset) {
+  const uint8Buffer = new Uint8Array(memory.buffer);
+  let stringEnd = offset;
+  while (uint8Buffer[stringEnd] !== 0) {
+    stringEnd += 1;
+  }
+  var bytes = new Uint8Array(uint8Buffer, offset, stringEnd);
   const string = new TextDecoder('utf8').decode(bytes);
   console.log(string);
 }

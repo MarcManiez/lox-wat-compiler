@@ -13,9 +13,10 @@ import java.util.List;
 
 class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   private int indentationLevel = 0;
-  private PrintWriter writer;
+  private int memoryOffset = 0;
   private final List<Stmt> statements;
   private List<String> lines;
+  private List<String> memoryLines;
   // Wasm is destined to export a function, kind of like C with its "main".
   // The compiler should have a boiler plate "main" function declaration.
   // The instructions from the lox code would fit inside that function.
@@ -25,6 +26,7 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   Compiler(List<Stmt> statements) {
     this.statements = statements;
     this.lines = new ArrayList<String>();
+    this.memoryLines = new ArrayList<String>();
   }
 
   void compile() throws IOException {
@@ -32,7 +34,7 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     indent();
     // TODO: use codegen to make JS file to coordinate function signatures and names
     writeLine("(import \"console\" \"logFloat\" (func $logFloat (param f32)))");
-    writeLine("(import \"console\" \"logString\" (func $logString (param i32 i32)))");
+    writeLine("(import \"console\" \"logString\" (func $logString (param i32)))");
     writeLine("(import \"js\" \"mem\" (memory 1))");
     writeLine("(func (export \"main\")");
     indent();
@@ -41,6 +43,9 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
     outdent();
     writeLine(")");
+    for (String line : memoryLines) {
+      writeLine(line);
+    }
     outdent();
     writeLine(")");
     createFile();
@@ -121,6 +126,12 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Object visitLiteralExpr(Literal expr) {
     if (expr.value instanceof String) {
+      writeLine("(i32.const " + memoryOffset + ")");
+      String string = expr.value + "\\00";
+      String memoryInstruction = "(data (i32.const " + memoryOffset + ") \"" + string +"\")";
+      memoryLines.add(memoryInstruction);
+      // TODO: handle byte length instead of symbol length
+      memoryOffset += expr.value.toString().length();
     } else {
       writeLine("(f32.const " + expr.value.toString() + ")");
     }
