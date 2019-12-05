@@ -110,14 +110,22 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Object visitBinaryExpr(Binary expr) {
     // TODO: implement other binary operations
+    Interpreter interpreter = new Interpreter();
+    Object left = interpreter.evaluate(expr.left);
+    Object right = interpreter.evaluate(expr.right);
     switch (expr.operator.type) {
       case PLUS:
-        writeLine("(f32.add");
-        indent();
-        compile(expr.left);
-        compile(expr.right);
-        outdent();
-        writeLine(")");
+        if (left instanceof Double && right instanceof Double) {
+          writeLine("(f32.add");
+          indent();
+          compile(expr.left);
+          compile(expr.right);
+          outdent();
+          writeLine(")");
+        } else {
+          String string = Interpreter.stringify(left) + Interpreter.stringify(right);
+          writeStringLine(string);
+        }
         break;
     }
     return null;
@@ -126,15 +134,21 @@ class Compiler implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
   @Override
   public Object visitLiteralExpr(Literal expr) {
     if (expr.value instanceof String) {
-      writeLine("(i32.const " + memoryOffset + ")");
-      String string = expr.value + "\\00";
-      String memoryInstruction = "(data (i32.const " + memoryOffset + ") \"" + string +"\")";
-      memoryLines.add(memoryInstruction);
-      // TODO: handle byte length instead of symbol length
-      memoryOffset += expr.value.toString().length();
+      writeStringLine(expr.value.toString());
     } else {
       writeLine("(f32.const " + expr.value.toString() + ")");
     }
+    return null;
+  }
+
+  private Void writeStringLine(String string) {
+    writeLine("(i32.const " + memoryOffset + ")");
+    String nullTerminatedString = string + "\\00";
+    String memoryInstruction =
+      "(data (i32.const " + memoryOffset + ") \"" + nullTerminatedString +"\")";
+    memoryLines.add(memoryInstruction);
+    // TODO: handle byte length instead of symbol length
+    memoryOffset += string.length();
     return null;
   }
 }
