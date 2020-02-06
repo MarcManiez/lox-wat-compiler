@@ -12,7 +12,7 @@ This is the first compiler I've writen, and WAT seemed appropriately challenging
 
 - Install Maven
 - You can then play with lox in an REPL using [`./jlox`](./jlox) from the root folder
-- To run lox from a file, run `./jlox [filename] --compile`
+- To run lox from a file, run `./jlox [filename]`
 
 ## Compiling to WAT
 
