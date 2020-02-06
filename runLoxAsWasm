@@ -1,4 +1,4 @@
 #bin/bash
-./jlox /Users/marcmaniez/Personal/BradfieldCS/languages/lox/test.lox --compile
+./jlox ./test.lox --compile
 wat2wasm ./output.wat
 node ./wasmRunner.js ./output.wasm
